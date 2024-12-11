@@ -1,64 +1,111 @@
-from tkinter import *
-from PIL import Image, ImageFont, ImageDraw
+import customtkinter as ctk
+import tkinter as tk
+import os
+import cv2
+from PIL import ImageTk, Image
 from tkinter import filedialog
 
+photo = None
+cv_img = None
 
-root = Tk()
-root.title('Codemy.com - Add Text To Images')
-root.geometry("600x650")
+def add_text():
+    global cv_img
+    text = entry.get()
+    
+    if text and cv_img is not None:
+        position = (50, 50)  # Position where the text will be placed
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale = 1
+        color = (255, 255, 255)  # White color
+        thickness = 2
 
-file_image = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.bmp;*.gif")])
+        # Add text to the image using OpenCV
+        cv2.putText(cv_img, text, position, font, font_scale, color, thickness)
+        
+        # Update the image label with the new image
+        cv_img_rgb = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
+        pil_img = Image.fromarray(cv_img_rgb)
+        photo = ImageTk.PhotoImage(pil_img)
+        label.configure(image=photo)
+        label.image = photo
 
+def open_image():
+    global cv_img, photo
+    
+    image_file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.bmp;*.gif")])
+    if image_file_path:
+        # Open the image using OpenCV
+        cv_img = cv2.imread(image_file_path)
 
-# Add Text To Image
-def add_it():
+        # Convert the image from BGR to RGB color space
+        cv_img_rgb = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
 
-	# Open our image
-    my_image = Image.open(file_image)
-	# Define The Font
-    text_font = ImageFont.truetype("arial.ttf", 46)
-    # Get text to add to image
-    text_to_add = my_entry.get()
+        # Convert the OpenCV image to a PIL image
+        pil_img = Image.fromarray(cv_img_rgb)
 
-    # Edit the Image
-    edit_image = ImageDraw.Draw(my_image)
-    edit_image.text((150, 300), text_to_add, ("green"), font=text_font)
+        # Convert the PIL image to an ImageTk photo image
+        photo = ImageTk.PhotoImage(pil_img)
 
-    # Save The Image
-    my_image.save(file_image)
+        # Display the image in the Tkinter label
+        label.configure(image=photo, text="")
+        label.image = photo
 
-    # Clear the entry box
-    my_entry.delete(0, END)
-    my_entry.insert(0, "Saving File...")
+# _____________________________________________________gui_____________________________________________________________________________
 
-    # Wait a couple seconds and then show image
-    my_label.after(2000, show_pic)
+root = ctk.CTk()
+root.title("DC")
 
-def show_pic():
-	# Show New Image
-	global aspen2
-	aspen2 = PhotoImage(file=file_image)
-	my_label.config(image=aspen2)
+window_width = 1080
+window_height = 630
 
-	# Clear the entry box 
-	my_entry.delete(0, END)
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
 
+x = (screen_width / 2) - (window_width / 2)
+y = (screen_height / 2) - (window_height / 2)
 
+root.geometry('%dx%d+%d+%d' % (window_width, window_height, x, y))
 
-# Define Image
-aspen = PhotoImage(file=file_image)
+frame_right = ctk.CTkFrame(root, corner_radius=20, width=400)
+frame_right.pack_propagate(False)
+frame_right.pack(side=ctk.RIGHT, fill=ctk.BOTH, padx=20, pady=20)
 
-# Create A Label
-my_label = Label(root, image=aspen)
-my_label.pack(pady=20)
+frame_left = ctk.CTkFrame(root, corner_radius=20, width=640)
+frame_left.pack_propagate(False)
+frame_left.pack(side=ctk.LEFT, fill=ctk.BOTH, padx=20, pady=20)
 
-#Entry Box
-my_entry = Entry(root, font=("Helvetica", 24))
-my_entry.pack(pady=20)
+frame_image = ctk.CTkFrame(frame_left, corner_radius=20, width=400, height=500)
+frame_image.pack_propagate(False)
+frame_image.pack(side=ctk.TOP, padx=20, pady=20)
 
-# Button
-my_button = Button(root, text="Add Text To Image",
-	command=add_it, font=("Helvetica", 24))
-my_button.pack(pady=20)
+frame_box = ctk.CTkFrame(frame_right, corner_radius=20, width=440, height=50)
+frame_box.pack_propagate(False)
+frame_box.pack(side=ctk.TOP, padx=20, pady=20)
+
+# _____________________________________________________left frame_____________________________________________________________________________
+
+select_btn = ctk.CTkButton(frame_left, fg_color='#5b0e75', hover_color='#270433', text='Select Image',
+                           font=('Poppins', 16), corner_radius=20, height=35, command=open_image)
+select_btn.pack()
+
+label = ctk.CTkLabel(frame_image)
+label.pack(expand=True)
+
+# _____________________________________________________right frame_____________________________________________________________________________
+
+entry = ctk.CTkEntry(frame_box, width=200, height=40, corner_radius=15)
+entry.pack(side=ctk.LEFT, padx=(10, 10))
+
+add_text_btn = ctk.CTkButton(frame_box, fg_color='#5b0e75', hover_color='#270433', text='Change Text',
+                             font=('Poppins', 16), corner_radius=20, width=30, height=35, command=add_text)
+add_text_btn.pack(side=ctk.RIGHT, padx=(0, 10))
+
+combo_size = ctk.CTkComboBox(frame_right, button_color='#5b0e75')
+combo_size.set("Select")
+combo_size.pack(side=ctk.TOP, pady=(150, 0))
+
+save_btn = ctk.CTkButton(frame_right, fg_color='#5b0e75', hover_color='#270433', text='Save',
+                         font=('Poppins', 16), corner_radius=20, width=30, height=35)
+save_btn.pack(side=ctk.TOP, pady=10)
 
 root.mainloop()

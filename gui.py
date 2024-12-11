@@ -5,47 +5,55 @@ import cv2 as cv2
 from PIL import ImageTk, Image, ImageDraw, ImageFont
 from tkinter import PhotoImage, filedialog
 
+photo = None
+cv_img = None
 
-def add_text(image):
-    # Get text to add to image
-    text_to_add = entry.get()
 
-    # Edit the Image
-    edit_image = ImageDraw.Draw(image)
-    edit_image.text((150, 300), text_to_add, ("green"), font=text_font)
-
-    # Save The Image
-    my_image.save(image)
-
-    # Clear the entry box
-    entry.delete(0, END)
-    entry.insert(0, "Saving File...")
-
-    # Wait a couple seconds and then show image
-    my_label.after(2000, show_pic)
-
+def add_text():
+    global cv2
+    text = entry.get()
+    if text and cv_img is not None:
+        position = (50, 50)  # Position where the text will be placed
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale = 1
+        color = (255, 255, 255)  # White color
+        thickness = 2
+        # Add text to the image using OpenCV
+        cv2.putText(cv_img, text, position, font, font_scale, color, thickness)
+        
+        # Update the image label with the new image
+        cv_img_rgb = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
+        pil_img = Image.fromarray(cv_img_rgb)
+        photo = ImageTk.PhotoImage(pil_img)
+        label.configure(image=photo)
+        label.image = photo
 
 
 def open_image():
+    global cv_img, photo
     image_file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.bmp;*.gif")])
+
     if image_file_path:
-        selected_img = ImageTk.PhotoImage(Image.open(image_file_path))
-        image_label = tk.Label(frame_image, image=selected_img)
-        image_label.image = selected_img
-        image_label.pack(expand=True, fill=tk.BOTH)
-        add_text(image=selected_img)
+        # Open the image using OpenCV
+        cv_img = cv2.imread(image_file_path)
 
-
+        # Convert the image from BGR to RGB color space
+        cv_img_rgb = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
+        
+        # Convert the OpenCV image to a PIL image
+        pil_img = Image.fromarray(cv_img_rgb)
+        
+        # Convert the PIL image to an ImageTk photo image
+        photo = ImageTk.PhotoImage(pil_img)
+        
+        # Display the image in the Tkinter label
+        label.configure(image=photo, text="")
+        label.image = photo
 
 #_____________________________________________________gui_____________________________________________________________________________
 
 root = ctk.CTk()
 root.title("DC")
-
-# root.iconpath = ImageTk.PhotoImage(file=os.path.join("assets","dc.png"))
-# rott.wm_iconbitmap()
-# root.iconphoto(False,root.iconpath)
-
 
 window_width = 1080
 window_height = 630
@@ -80,14 +88,17 @@ select_btn = ctk.CTkButton(frame_left, fg_color='#5b0e75', hover_color='#270433'
                            font=('Poppins', 16), corner_radius=20, height=35, command=open_image)
 select_btn.pack()
 
+label = ctk.CTkLabel(frame_image)
+label.pack(expand=True)
+
 #_____________________________________________________right frame_____________________________________________________________________________
 
 entry = ctk.CTkEntry(frame_box, width=200, height=40, corner_radius=15)
 entry.pack(side=ctk.LEFT, padx=(10, 10))
 
-change_text_btn = ctk.CTkButton(frame_box, fg_color='#5b0e75', hover_color='#270433', text='Chaneg Text',
+add_text_btn = ctk.CTkButton(frame_box, fg_color='#5b0e75', hover_color='#270433', text='Add Text',
                                 font=('Poppins', 16), corner_radius=20, width=30, height=35, command=add_text)
-change_text_btn.pack(side=ctk.RIGHT, padx=(0, 10))
+add_text_btn.pack(side=ctk.RIGHT, padx=(0, 10))
 
 combo_size = ctk.CTkComboBox(frame_right, button_color='#5b0e75')
 combo_size.set("Select")
@@ -97,5 +108,3 @@ save_btn = ctk.CTkButton(frame_right, fg_color='#5b0e75', hover_color='#270433',
 save_btn.pack(side=ctk.TOP, pady=10)
 
 root.mainloop()
-
-
