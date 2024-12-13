@@ -2,6 +2,7 @@ import customtkinter as ctk
 import tkinter as tk
 import os
 import cv2 as cv2
+from messagebox.CTkMessagebox import CTkMessagebox
 from PIL import ImageTk, Image, ImageDraw, ImageFont
 from tkinter import PhotoImage, filedialog
 
@@ -12,11 +13,11 @@ cv_img = None
 def add_text():
     global cv2
     text = entry.get()
-    if text and cv_img is not None:
+    if text != '':
         position = (50, 50)  # Position where the text will be placed
         font = cv2.FONT_HERSHEY_SIMPLEX
         font_scale = 1
-        color = (255, 255, 255)  # White color
+        color = (99, 99, 99)  # White color
         thickness = 2
         # Add text to the image using OpenCV
         cv2.putText(cv_img, text, position, font, font_scale, color, thickness)
@@ -27,6 +28,9 @@ def add_text():
         photo = ImageTk.PhotoImage(pil_img)
         label.configure(image=photo)
         label.image = photo
+
+    else:
+        CTkMessagebox(title="Error", message="Something went wrong!!!", icon="cancel")
 
 
 def open_image():
