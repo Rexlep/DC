@@ -13,6 +13,8 @@ cv_img = None
 def add_text():
     global cv2
     text = entry.get()
+    color = entry_color.get()
+
     if text != '':
         position = (50, 50)  # Position where the text will be placed
         font = cv2.FONT_HERSHEY_SIMPLEX
@@ -28,9 +30,9 @@ def add_text():
         photo = ImageTk.PhotoImage(pil_img)
         label.configure(image=photo)
         label.image = photo
-
     else:
-        CTkMessagebox(title="Error", message="Something went wrong!!!", icon="cancel")
+        CTkMessagebox(title="Error", message="The image is empty", icon="cancel", fade_in_duration=.2, button_color="#5b0e75", button_hover_color='#270433')
+   
 
 
 def open_image():
@@ -53,6 +55,8 @@ def open_image():
         # Display the image in the Tkinter label
         label.configure(image=photo, text="")
         label.image = photo
+    else:
+        CTkMessagebox(title="Error", message="The file path is empty", icon="cancel", fade_in_duration=.2, button_color="#5b0e75", button_hover_color='#270433')
 
 #_____________________________________________________gui_____________________________________________________________________________
 
@@ -92,21 +96,20 @@ select_btn = ctk.CTkButton(frame_left, fg_color='#5b0e75', hover_color='#270433'
                            font=('Poppins', 16), corner_radius=20, height=35, command=open_image)
 select_btn.pack()
 
-label = ctk.CTkLabel(frame_image)
+label = ctk.CTkLabel(frame_image,text="")
 label.pack(expand=True)
 
 #_____________________________________________________right frame_____________________________________________________________________________
 
-entry = ctk.CTkEntry(frame_box, width=200, height=40, corner_radius=15)
+entry = ctk.CTkEntry(frame_box, placeholder_text="Enter your text", width=200, height=40, corner_radius=15)
 entry.pack(side=ctk.LEFT, padx=(10, 10))
 
 add_text_btn = ctk.CTkButton(frame_box, fg_color='#5b0e75', hover_color='#270433', text='Add Text',
                                 font=('Poppins', 16), corner_radius=20, width=30, height=35, command=add_text)
 add_text_btn.pack(side=ctk.RIGHT, padx=(0, 10))
 
-combo_size = ctk.CTkComboBox(frame_right, button_color='#5b0e75')
-combo_size.set("Select")
-combo_size.pack(side=ctk.TOP, pady=(150, 0))
+entry_color = ctk.CTkEntry(frame_right, placeholder_text="Enter a hex color", width=200, height=40, corner_radius=15)
+entry_color.pack(side=ctk.TOP, pady=(150, 0))
 
 save_btn = ctk.CTkButton(frame_right, fg_color='#5b0e75', hover_color='#270433', text='Save', font=('Poppins', 16), corner_radius=20, width=30, height=35)
 save_btn.pack(side=ctk.TOP, pady=10)
